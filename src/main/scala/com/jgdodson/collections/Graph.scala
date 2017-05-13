@@ -34,14 +34,6 @@ class Graph[T](connections: Iterable[(T, T)]) extends AbstractGraph[T] {
   def degreeMap: Map[T, Int] = {
     ???
   }
-
-  def dfs(start: T, target: T): Int = {
-    ???
-  }
-
-  def bfs(start: T, target: T): Int = {
-    ???
-  }
 }
 
 object Graph {
