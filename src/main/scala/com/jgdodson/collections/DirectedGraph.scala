@@ -1,22 +1,38 @@
 package com.jgdodson.collections
 
-import scala.collection.mutable
-
 class DirectedGraph[T](directedConnections: Iterable[(T, T)]) extends AbstractGraph[T] {
 
   val nodes: Vector[T] = directedConnections.flatMap(edge => Set(edge._1, edge._2)).toVector
 
   // Remove all self-connections and duplicates
-  val edges: Vector[(T, T)] = directedConnections.filter(conn => conn._1 != conn._2).toSet.toVector
+  val edges: Set[(T, T)] = directedConnections.filter(conn => conn._1 != conn._2).toSet
+
+  // Part of the Set trait
+  def contains(edge: (T, T)): Boolean = {
+    edges.contains(edge)
+  }
+
+  // Part of the Set trait
+  def +(elem: (T, T)): DirectedGraph[T] = {
+    DirectedGraph(edges + elem)
+  }
+
+  // Part of the Set trait
+  def -(elem: (T, T)): DirectedGraph[T] = {
+    DirectedGraph(edges.filterNot(edge => edge == elem))
+  }
+
+  // Part of the Set trait
+  override def empty: DirectedGraph[T] = DirectedGraph[T](Nil)
 
   // Remove all duplicates
   val adjacencyMap: Map[T, Vector[T]] = {
 
     // Builder
-    val b = mutable.Map[T, mutable.Set[T]]()
+    val b = collection.mutable.Map[T, collection.mutable.Set[T]]()
 
     for (node <- nodes) {
-      b(node) = mutable.Set[T]()
+      b(node) = collection.mutable.Set[T]()
     }
 
     for (edge <- edges) {

@@ -1,9 +1,7 @@
 package com.jgdodson.collections
 
-import scala.collection.mutable
 
-
-abstract class AbstractGraph[T] {
+abstract class AbstractGraph[T] extends Set[(T, T)] {
 
   def nodes: Iterable[T]
 
@@ -11,6 +9,7 @@ abstract class AbstractGraph[T] {
 
   def adjacencyMap: Map[T, Iterable[T]]
 
+  def iterator: Iterator[(T, T)] = edges.iterator
 
   /**
     * Search for a path between the start node and the target node
@@ -22,10 +21,10 @@ abstract class AbstractGraph[T] {
   def dfs(start: T, target: T): Option[Vector[T]] = {
 
     // All the nodes we have visited while searching
-    val visited = mutable.Set[T](start)
+    val visited = collection.mutable.Set[T](start)
 
     // The path between the start node and our search position
-    val path = mutable.Stack[T](start)
+    val path = collection.mutable.Stack[T](start)
 
     // Trivial case
     if (start == target) {
@@ -75,10 +74,10 @@ abstract class AbstractGraph[T] {
   def bfs(start: T, target: T): Option[Vector[T]] = {
 
     // All the nodes we have visited while searching
-    val visited = mutable.Set[T](start)
+    val visited = collection.mutable.Set[T](start)
 
     // The roots of sub-trees left to visit
-    val toVisit = mutable.Queue[Vector[T]](Vector(start))
+    val toVisit = collection.mutable.Queue[Vector[T]](Vector(start))
 
     // Trivial case
     if (start == target) {
