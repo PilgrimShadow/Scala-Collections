@@ -9,7 +9,16 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
 
   def adjacencyMap: Map[T, Iterable[T]]
 
+
+  /**
+    * Return an Iterator over the edges of the graph
+    *
+    * Part of the Set trait
+    *
+    * @return
+    */
   def iterator: Iterator[(T, T)] = edges.iterator
+
 
   /**
     * Search for a path between the start node and the target node
@@ -18,7 +27,7 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
     * @param target The target node
     * @return
     */
-  def dfs(start: T, target: T): Option[Vector[T]] = {
+  def dfs(start: T, target: T): Vector[T] = {
 
     // All the nodes we have visited while searching
     val visited = collection.mutable.Set[T](start)
@@ -28,7 +37,7 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
 
     // Trivial case
     if (start == target) {
-      return Some(path.toVector)
+      return path.toVector
     }
 
     // Anonymous helper function
@@ -45,7 +54,7 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
 
         // If the target has been found, stop searching and return the path
         if (n == target) {
-          return Some(path.reverse.toVector)
+          return path.reverse.toVector
         }
 
         // Search the unexplored subtree rooted at n
@@ -60,7 +69,7 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
     helper(start)
 
     // No path to the target was found
-    None
+    Vector()
   }
 
 
@@ -71,7 +80,7 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
     * @param target The target node
     * @return
     */
-  def bfs(start: T, target: T): Option[Vector[T]] = {
+  def bfs(start: T, target: T): Vector[T] = {
 
     // All the nodes we have visited while searching
     val visited = collection.mutable.Set[T](start)
@@ -81,7 +90,7 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
 
     // Trivial case
     if (start == target) {
-      return Some(Vector(start))
+      return Vector(start)
     }
 
     // While unexplored sub-trees remain...
@@ -94,7 +103,7 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
 
         // If the target has been found, stop searching and return the path
         if (n == target) {
-          return Some(path :+ n)
+          return path :+ n
         }
 
         // We've now visited this node
@@ -107,6 +116,6 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
     }
 
     // No path to the target was found
-    None
+    Vector()
   }
 }

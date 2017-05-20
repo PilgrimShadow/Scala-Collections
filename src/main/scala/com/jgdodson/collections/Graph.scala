@@ -12,23 +12,60 @@ class Graph[T](connections: Iterable[(T, T)]) extends AbstractGraph[T] {
       (v(0), v(1))
     })
 
-  // Part of the Set trait
+
+  /**
+    * Determine whether this graph contains an edge
+    *
+    * Part of the Set trait
+    *
+    * @param edge The edge to test for membership
+    * @return
+    */
   def contains(edge: (T, T)): Boolean = {
-    edges.contains(edge)
+    edges.contains(edge) || edges.contains((edge._2, edge._1))
   }
 
-  // Part of the Set trait
-  def +(elem: (T, T)): Graph[T] = {
-    Graph(edges + elem)
+
+  /**
+    * Add a new edge to the graph
+    *
+    * Part of the Set trait
+    *
+    * @param edge The edge to add
+    * @return
+    */
+  def +(edge: (T, T)): Graph[T] = {
+    if (this.contains(edge)) {
+      this
+    } else {
+      Graph(edges + edge)
+    }
   }
 
-  // Part of the Set trait
-  def -(elem: (T, T)): Graph[T] = {
-    Graph(edges.filterNot(edge => edge == elem))
+
+  /**
+    * Remove an edge from this graph
+    *
+    * Part of the Set trait
+    *
+    * @param edge The edge to remove
+    * @return
+    */
+  def -(edge: (T, T)): Graph[T] = {
+    val rev = (edge._2, edge._1)
+    Graph(edges.filterNot(existing => (existing == edge) || (existing == rev)))
   }
 
-  // Part of the Set trait
+
+  /**
+    * Return an empty graph
+    *
+    * Part of the Set trait
+    *
+    * @return
+    */
   override def empty: Graph[T] = Graph[T](Nil)
+
 
   val adjacencyMap: Map[T, Vector[T]] = {
 
@@ -54,5 +91,22 @@ class Graph[T](connections: Iterable[(T, T)]) extends AbstractGraph[T] {
 
 object Graph {
 
+  /**
+    * Convenience method for instantiation without new
+    *
+    * @param edgeList
+    * @tparam T
+    * @return
+    */
   def apply[T](edgeList: Iterable[(T, T)]): Graph[T] = new Graph(edgeList)
+
+
+  /**
+    * Create a Graph from a DirectedGraph
+    *
+    * @param dg
+    * @tparam T
+    * @return
+    */
+  def apply[T](dg: DirectedGraph[T]): Graph[T] = Graph(dg.edges)
 }

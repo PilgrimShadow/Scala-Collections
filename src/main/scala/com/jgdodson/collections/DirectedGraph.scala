@@ -7,22 +7,53 @@ class DirectedGraph[T](directedConnections: Iterable[(T, T)]) extends AbstractGr
   // Remove all self-connections and duplicates
   val edges: Set[(T, T)] = directedConnections.filter(conn => conn._1 != conn._2).toSet
 
-  // Part of the Set trait
+
+  /**
+    * Determine whether this graph contains an edge
+    *
+    * Part of the Set trait
+    *
+    * @param edge The edge to test for membership
+    * @return
+    */
   def contains(edge: (T, T)): Boolean = {
     edges.contains(edge)
   }
 
-  // Part of the Set trait
-  def +(elem: (T, T)): DirectedGraph[T] = {
-    DirectedGraph(edges + elem)
+
+  /**
+    * Add a new edge to the graph
+    *
+    * Part of the Set trait
+    *
+    * @param edge The edge to add
+    * @return
+    */
+  def +(edge: (T, T)): DirectedGraph[T] = {
+    DirectedGraph(edges + edge)
   }
 
-  // Part of the Set trait
-  def -(elem: (T, T)): DirectedGraph[T] = {
-    DirectedGraph(edges.filterNot(edge => edge == elem))
+
+  /**
+    * Remove an edge from this graph
+    *
+    * Part of the Set trait
+    *
+    * @param edge The edge to remove
+    * @return
+    */
+  def -(edge: (T, T)): DirectedGraph[T] = {
+    DirectedGraph(edges.filterNot(_ == edge))
   }
 
-  // Part of the Set trait
+
+  /**
+    * Return an empty graph
+    *
+    * Part of the Set trait
+    *
+    * @return
+    */
   override def empty: DirectedGraph[T] = DirectedGraph[T](Nil)
 
   // Remove all duplicates
