@@ -29,18 +29,18 @@ abstract class AbstractGraph[T] extends Set[(T, T)] {
     */
   def dfs(start: T, target: T): Vector[T] = {
 
+    // Trivial case
+    if (start == target) {
+      return Vector(start)
+    }
+
     // All the nodes we have visited while searching
     val visited = collection.mutable.Set[T](start)
 
     // The path between the start node and our search position
     val path = collection.mutable.Stack[T](start)
 
-    // Trivial case
-    if (start == target) {
-      return path.toVector
-    }
-
-    // Anonymous helper function
+    // Helper function that searches the subtree rooted at `node`
     lazy val helper: (T => Unit) = (node: T) => {
 
       // For every neighboring node we have not visited
