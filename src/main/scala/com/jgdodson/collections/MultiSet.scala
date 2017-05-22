@@ -3,10 +3,12 @@ package com.jgdodson.collections
 /**
   * A traditional multiset, which can contain numerous copies of an element
   *
+  * TODO: Decide what class MultiSet should extend
+  *
   * @param countMap A Map specifying the members of the MultiSet and their frequency
   * @tparam T The type of item contained in the MultiSet
   */
-class MultiSet[T](val countMap: Map[T, Int]) {
+class MultiSet[T](val countMap: Map[T, Int]) extends Iterable[T] {
 
   // Check the integrity of countMap
   assert(countMap.values.forall(_ > 0), s"MultiSet initialization failed: ${countMap}")
@@ -15,7 +17,7 @@ class MultiSet[T](val countMap: Map[T, Int]) {
   /**
     * The number of elements in the MultiSet
     */
-  val size: Int = countMap.values.sum
+  override val size: Int = countMap.values.sum
 
 
   /**
@@ -84,7 +86,7 @@ class MultiSet[T](val countMap: Map[T, Int]) {
     *
     * @return
     */
-  def isEmpty: Boolean = {
+  override def isEmpty: Boolean = {
     countMap.isEmpty
   }
 
@@ -92,7 +94,7 @@ class MultiSet[T](val countMap: Map[T, Int]) {
     *
     * @return
     */
-  def nonEmpty: Boolean = {
+  override def nonEmpty: Boolean = {
     countMap.nonEmpty
   }
 
@@ -124,7 +126,7 @@ class MultiSet[T](val countMap: Map[T, Int]) {
     *
     * @return
     */
-  def toSet: Set[T] = countMap.keySet
+  override def toSet[B >: T]: Set[B] = countMap.keysIterator.asInstanceOf[Iterator[B]].toSet
 
 
   /**

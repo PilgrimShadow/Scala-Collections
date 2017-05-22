@@ -8,6 +8,8 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
 
   implicit def ArbitraryMultiSet[T](implicit arbitrary: Arbitrary[T]): Arbitrary[MultiSet[T]] = Arbitrary {
 
+    // Beware Int.MaxValue and Int.MinValue
+    // We cap the count for a single element at 100 to prevent heap overflow from large test values
     Arbitrary.arbitrary[Map[T, Int]].map(m => MultiSet(m.mapValues(count => (if (count == 0 || count == Int.MinValue) 1 else math.abs(count)).min(100))))
   }
 
