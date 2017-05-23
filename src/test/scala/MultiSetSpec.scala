@@ -10,6 +10,8 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
   /**
     * Generate arbitrary MultiSets
     *
+    * TODO: Add a parameter to indicate elements which should be excluded
+    *
     * @param arb
     * @tparam T
     * @return
@@ -79,7 +81,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @return
     */
   def AddingItemIncrementsSize[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MultiSet[Int], item: Int) => (multi + item).size == multi.size + 1)
-
+  
 
   /**
     * Test that the mode of a MultiSet is always the most numerous element
@@ -120,28 +122,6 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
   property("Adding item increases size by 1 [BigInt]") = AddingItemIncrementsSize[BigInt]
 
   property("Adding item increases size by 1 [String]") = AddingItemIncrementsSize[String]
-
-  property("Adding item to empty MultiSet [Int]") = forAll((item: Int) => {
-
-    val e = MultiSet[Int]()
-
-    val s = e + item
-
-    s.contains(item)
-    s.count(item) == 1
-  })
-
-
-  property("Adding item to empty MultiSet [String]") = forAll((item: String) => {
-
-    val e = MultiSet[String]()
-
-    val s = e + item
-
-    s.contains(item)
-    s.count(item) == 1
-  })
-
 
   property("MultiSet mode has highest count [Int]") = MultiSetModeHasHighestCount[Int]
 

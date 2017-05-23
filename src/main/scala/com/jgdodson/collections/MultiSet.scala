@@ -1,5 +1,7 @@
 package com.jgdodson.collections
 
+import scala.collection.mutable
+
 /**
   * A traditional multiset, which can contain numerous copies of an element
   *
@@ -134,6 +136,14 @@ class MultiSet[T](val countMap: Map[T, Int]) extends Iterable[T] {
     * @return
     */
   override def toString: String = s"MultiSet(${iterator.mkString(", ")})"
+
+
+  /**
+    * Create a new Builder for MultiSets with the same type as this
+    *
+    * @return
+    */
+  override def newBuilder: mutable.Builder[T, MultiSet[T]] = new mutables.MultiSetBuilder[T]
 
 
   /**

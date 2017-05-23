@@ -1,4 +1,4 @@
-package com.jgdodson.collections.mutable
+package com.jgdodson.collections.mutables
 
 import com.jgdodson.collections.AbstractGraph
 
