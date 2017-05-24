@@ -100,6 +100,37 @@ class MultiSet[T](val countMap: Map[T, Int]) extends Iterable[T] {
     countMap.nonEmpty
   }
 
+
+  /**
+    * Sum the elements of this MultiSet, assuming they are Numeric
+    *
+    * @param num
+    * @tparam B The type of the resultant sum
+    * @return
+    */
+  override def sum[B >: T](implicit num: Numeric[B]): B = countMap.foldLeft(num.zero)((acc, next) => num.plus(acc, num.times(next._1, num.fromInt(next._2))))
+
+
+  /**
+    * Return the maximum element in the MultiSet
+    *
+    * @param cmp
+    * @tparam B The type of the resultant max
+    * @return
+    */
+  override def max[B >: T](implicit cmp: Ordering[B]): T = countMap.keysIterator.max[B]
+
+
+  /**
+    * Return the minimum element in the MultiSet
+    *
+    * @param cmp
+    * @tparam B The type of the resultant min
+    * @return
+    */
+  override def min[B >: T](implicit cmp: Ordering[B]): T = countMap.keysIterator.min[B]
+
+
   /**
     * Return the most commonly occurring item in the MultiSet
     *
@@ -111,6 +142,7 @@ class MultiSet[T](val countMap: Map[T, Int]) extends Iterable[T] {
 
     countMap.maxBy(_._2)
   }
+
 
   /**
     * Return the count of the given element
@@ -132,6 +164,7 @@ class MultiSet[T](val countMap: Map[T, Int]) extends Iterable[T] {
 
 
   /**
+    * Return the String representation of this MultiSet
     *
     * @return
     */

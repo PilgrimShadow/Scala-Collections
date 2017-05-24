@@ -1,3 +1,5 @@
+
+// ScalaCheck
 import org.scalacheck.{Properties, Arbitrary, Gen}
 import org.scalacheck.Prop
 import org.scalacheck.Prop.forAll
@@ -13,7 +15,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * TODO: Add a parameter to indicate elements which should be excluded
     *
     * @param arb
-    * @tparam T
+    * @tparam T The type of item the arbitrary MultiSets will contain
     * @return
     */
   implicit def ArbitraryMultiSet[T](implicit arb: Arbitrary[T]): Arbitrary[MultiSet[T]] = Arbitrary {
@@ -27,13 +29,14 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * Generate arbitrary, non-empty MultiSets
     *
     * @param arb
-    * @tparam T
+    * @tparam T The type of item the arbitrary MultiSets will contain
     * @return
     */
   def NonEmptyMultiSets[T](implicit arb: Arbitrary[T]): Gen[MultiSet[T]] = ArbitraryMultiSet[T].arbitrary.suchThat(_.nonEmpty)
 
 
   /**
+    * Test that an empty MultiSet always reports as being empty
     *
     * @tparam T The type of item a tested MultiSet will contain
     * @return
@@ -54,7 +57,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
 
 
   /**
-    * Test that the size of a MultiSet is always  non-negative
+    * Test that the size of a MultiSet is always non-negative
     *
     * @param arb
     * @tparam T The type of item a tested MultiSet will contain
@@ -81,7 +84,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @return
     */
   def AddingItemIncrementsSize[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MultiSet[Int], item: Int) => (multi + item).size == multi.size + 1)
-  
+
 
   /**
     * Test that the mode of a MultiSet is always the most numerous element
@@ -94,6 +97,49 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
 
     multi.countMap.values.forall(_ <= multi.mode._2)
   })
+
+
+  /**
+    * Test that the max of a MultiSet is the max of its Iterator
+    *
+    * @param arb
+    * @param ord
+    * @tparam T The type of item a tested MultiSet will contain
+    * @return
+    */
+  def MaxEqualsMaxOfIterator[T](implicit arb: Arbitrary[T], ord: Ordering[T]): Prop = forAll(NonEmptyMultiSets[T])(multi => {
+
+    multi.max == multi.iterator.max
+  })
+
+
+  /**
+    * Test that the min of a MultiSet equals the min of its Iterator
+    *
+    * @param arb
+    * @param ord
+    * @tparam T The type of item a tested MultiSet will contain
+    * @return
+    */
+  def MinEqualsMinOfIterator[T](implicit arb: Arbitrary[T], ord: Ordering[T]): Prop = forAll(NonEmptyMultiSets[T])(multi => {
+
+    multi.min == multi.iterator.min
+  })
+
+
+  /**
+    * Test that the sum of a MultiSet equals the sum of its Iterator
+    *
+    * @param arb
+    * @param num
+    * @tparam T The type of item a tested MultiSet will contain
+    * @return
+    */
+  def SumEqualsSumOfIterator[T](implicit arb: Arbitrary[T], num: Numeric[T]): Prop = forAll((multi: MultiSet[T]) => {
+
+    multi.iterator.sum == multi.sum
+  })
+
 
   property("Empty MultiSet is empty [Int]") = EmptyMultiSetIsEmpty[Int]
 
@@ -128,4 +174,22 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
   property("MultiSet mode has highest count [BigInt]") = MultiSetModeHasHighestCount[BigInt]
 
   property("MultiSet mode has highest count [String]") = MultiSetModeHasHighestCount[String]
+
+  property("Sum of MultiSet Equals Sum of its Iterator [Int]") = SumEqualsSumOfIterator[Int]
+
+  property("Sum of MultiSet Equals Sum of its Iterator [Short]") = SumEqualsSumOfIterator[Short]
+
+  property("Sum of MultiSet Equals Sum of its Iterator [BigInt]") = SumEqualsSumOfIterator[BigInt]
+
+  property("Max of MultiSet Equals Max of its Iterator [Int]") = MaxEqualsMaxOfIterator[Int]
+
+  property("Max of MultiSet Equals Max of its Iterator [Short]") = MaxEqualsMaxOfIterator[Short]
+
+  property("Max of MultiSet Equals Max of its Iterator [BigInt]") = MaxEqualsMaxOfIterator[BigInt]
+
+  property("Min of MultiSet Equals Min of its Iterator [Int]") = MinEqualsMinOfIterator[Int]
+
+  property("Min of MultiSet Equals Min of its Iterator [Short]") = MinEqualsMinOfIterator[Short]
+
+  property("Min of MultiSet Equals Min of its Iterator [BigInt]") = MinEqualsMinOfIterator[BigInt]
 }
