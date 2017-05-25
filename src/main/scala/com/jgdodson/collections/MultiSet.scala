@@ -1,6 +1,5 @@
 package com.jgdodson.collections
 
-
 /**
   * A traditional multiset, which can contain numerous copies of an element
   *
@@ -9,6 +8,25 @@ package com.jgdodson.collections
   * @tparam T The type of item contained in the MultiSet
   */
 trait MultiSet[T] extends Iterable[T] {
+
+
+  def +(elem: T): MultiSet[T]
+
+  def -(elem: T): MultiSet[T]
+
+  // TODO: Research what type the parameter should be
+  def ++(elems: Iterable[T]): MultiSet[T]
+
+  // TODO: Research what type the parameter should be
+  def --(elems: Iterable[T]): MultiSet[T]
+
+  /**
+    * Determine whether the MultiSet contains an item
+    *
+    * @param elem The element to test for membership
+    * @return
+    */
+  def contains(elem: T): Boolean
 
 
   /**
@@ -37,17 +55,25 @@ trait MultiSet[T] extends Iterable[T] {
     */
   def count(elem: T): Int
 
+
+  /**
+    * Return the String representation of this MultiSet
+    *
+    * @return
+    */
+  override def toString: String = s"MultiSet(${iterator.mkString(", ")})"
+
 }
 
 object MultiSet {
 
   // Convenience method
-  def apply[T](countMap: Map[T, Int]): MapMultiSet[T] = new MapMultiSet[T](countMap)
+  def apply[T](countMap: Map[T, Int]): MultiSet[T] = new MapMultiSet[T](countMap)
 
   // Convenience method
-  def apply[T](items: Iterable[T]): MapMultiSet[T] = new MapMultiSet[T](items)
+  def apply[T](items: Iterable[T]): MultiSet[T] = new MapMultiSet[T](items)
 
   // Convenience method
-  def apply[T](args: T*): MapMultiSet[T] = new MapMultiSet[T](args)
+  def apply[T](args: T*): MultiSet[T] = new MapMultiSet[T](args)
 
 }

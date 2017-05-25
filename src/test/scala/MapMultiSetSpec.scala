@@ -7,7 +7,7 @@ import org.scalacheck.Prop.forAll
 // The class being tested
 import com.jgdodson.collections.MapMultiSet
 
-object MultiSetSpec extends Properties("MultiSet Specification") {
+object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
 
   /**
     * Generate arbitrary MultiSets
@@ -140,6 +140,19 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     multi.iterator.sum == multi.sum
   })
 
+  /**
+    * Test that all elements with zero-count are filtered out during initialization
+    *
+    * @param arb
+    * @tparam T
+    * @return
+    */
+  def ZeroCountsAreFilteredOut[T](implicit arb: Arbitrary[T]): Prop = forAll((elem: T) => {
+    val multi = MapMultiSet[T](Map(elem -> 0))
+
+    !multi.countMap.contains(elem)
+  })
+
 
   property("Empty MultiSet is empty [Int]") = EmptyMultiSetIsEmpty[Int]
 
@@ -192,4 +205,10 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
   property("Min of MultiSet Equals Min of its Iterator [Short]") = MinEqualsMinOfIterator[Short]
 
   property("Min of MultiSet Equals Min of its Iterator [BigInt]") = MinEqualsMinOfIterator[BigInt]
+
+  property("Zero-count elements are filtered out [Int]") = ZeroCountsAreFilteredOut[Int]
+
+  property("Zero-count elements are filtered out [Short]") = ZeroCountsAreFilteredOut[Short]
+
+  property("Zero-count elements are filtered out [BigInt]") = ZeroCountsAreFilteredOut[BigInt]
 }

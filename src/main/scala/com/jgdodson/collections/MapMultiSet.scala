@@ -11,7 +11,8 @@ import scala.collection.mutable
 class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
 
   // Check the integrity of countMap
-  assert(counts.values.forall(_ > 0), s"MultiSet initialization failed: ${counts}")
+  // TODO: Research the proper Error to throw here
+  assert(counts.values.forall(_ >= 0), s"MapMultiSet initialization failed: ${counts}")
 
 
   /**
@@ -25,7 +26,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     *
     * @return
     */
-  def countMap: Map[T, Int] = counts
+  def countMap: Map[T, Int] = counts.filter(_._2 > 0)
 
 
   /**
@@ -38,7 +39,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     */
   def this(items: Iterable[T]) = this {
 
-    val m = collection.mutable.Map[T, Int]()
+    val m = mutable.Map[T, Int]()
 
     for (item <- items) {
       m(item) = m.getOrElse(item, 0) + 1
@@ -60,6 +61,24 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
 
 
   /**
+    * Create a MapMultiSet will all elements in the given collection added
+    *
+    * @param elems The elements to be added
+    * @return
+    */
+  def ++(elems: Iterable[T]): MapMultiSet[T] = {
+
+    val m = mutable.Map[T, Int]()
+
+    for (elem <- elems) {
+      m(elem) = m.getOrElse(elem, 0) + 1
+    }
+
+    new MapMultiSet(counts.map(elem => (elem._1, elem._2 + m.getOrElse(elem._1, 0))))
+  }
+
+
+  /**
     * Return a MultiSet with the given element removed
     *
     * @param elem The element to remove
@@ -75,6 +94,24 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     } else {
       this
     }
+  }
+
+
+  /**
+    * Create a MapMultiSet will all elements in the given collection removed
+    *
+    * @param elems The elements to be removed
+    * @return
+    */
+  def --(elems: Iterable[T]): MapMultiSet[T] = {
+
+    val m = mutable.Map[T, Int]()
+
+    for (elem <- elems) {
+      m(elem) = m.getOrElse(elem, 0) + 1
+    }
+
+    new MapMultiSet(counts.map(elem => (elem._1, math.max(0, elem._2 - m.getOrElse(elem._1, 0)))))
   }
 
 
@@ -189,14 +226,6 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @return
     */
   override def toSet[B >: T]: Set[B] = counts.keysIterator.asInstanceOf[Iterator[B]].toSet
-
-
-  /**
-    * Return the String representation of this MultiSet
-    *
-    * @return
-    */
-  override def toString: String = s"MultiSet(${iterator.mkString(", ")})"
 
 
   /**
