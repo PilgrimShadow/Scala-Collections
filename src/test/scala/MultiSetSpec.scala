@@ -5,7 +5,7 @@ import org.scalacheck.Prop
 import org.scalacheck.Prop.forAll
 
 // The class being tested
-import com.jgdodson.collections.MultiSet
+import com.jgdodson.collections.MapMultiSet
 
 object MultiSetSpec extends Properties("MultiSet Specification") {
 
@@ -18,11 +18,11 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item the arbitrary MultiSets will contain
     * @return
     */
-  implicit def ArbitraryMultiSet[T](implicit arb: Arbitrary[T]): Arbitrary[MultiSet[T]] = Arbitrary {
+  implicit def ArbitraryMultiSet[T](implicit arb: Arbitrary[T]): Arbitrary[MapMultiSet[T]] = Arbitrary {
 
     // Beware Int.MaxValue and Int.MinValue
     // We cap the count for a single element at 100 to prevent heap overflow from large test values
-    Arbitrary.arbitrary[Map[T, Int]].map(m => MultiSet(m.mapValues(count => (if (count == 0 || count == Int.MinValue) 1 else math.abs(count)).min(100))))
+    Arbitrary.arbitrary[Map[T, Int]].map(m => MapMultiSet(m.mapValues(count => (if (count == 0 || count == Int.MinValue) 1 else math.abs(count)).min(100))))
   }
 
   /**
@@ -32,7 +32,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item the arbitrary MultiSets will contain
     * @return
     */
-  def NonEmptyMultiSets[T](implicit arb: Arbitrary[T]): Gen[MultiSet[T]] = ArbitraryMultiSet[T].arbitrary.suchThat(_.nonEmpty)
+  def NonEmptyMultiSets[T](implicit arb: Arbitrary[T]): Gen[MapMultiSet[T]] = ArbitraryMultiSet[T].arbitrary.suchThat(_.nonEmpty)
 
 
   /**
@@ -41,7 +41,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
-  def EmptyMultiSetIsEmpty[T]: Boolean = MultiSet[T]().isEmpty
+  def EmptyMultiSetIsEmpty[T]: Boolean = MapMultiSet[T]().isEmpty
 
 
   /**
@@ -51,7 +51,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
-  def EmptinessAndSizeAgree[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MultiSet[T]) => {
+  def EmptinessAndSizeAgree[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T]) => {
     (multi.isEmpty && multi.size == 0) || (multi.nonEmpty && multi.size > 0)
   })
 
@@ -63,7 +63,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
-  def SizeIsNonNegative[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MultiSet[T]) => multi.size >= 0)
+  def SizeIsNonNegative[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T]) => multi.size >= 0)
 
 
   /**
@@ -73,7 +73,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
-  def NeverEmptyAndNonEmpty[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MultiSet[T]) => multi.nonEmpty != multi.isEmpty)
+  def NeverEmptyAndNonEmpty[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T]) => multi.nonEmpty != multi.isEmpty)
 
 
   /**
@@ -83,7 +83,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
-  def AddingItemIncrementsSize[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MultiSet[Int], item: Int) => (multi + item).size == multi.size + 1)
+  def AddingItemIncrementsSize[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[Int], item: Int) => (multi + item).size == multi.size + 1)
 
 
   /**
@@ -93,7 +93,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
-  def MultiSetModeHasHighestCount[T](implicit arb: Arbitrary[T]): Prop = forAll(NonEmptyMultiSets[String])(multi => {
+  def ModeHasHighestCount[T](implicit arb: Arbitrary[T]): Prop = forAll(NonEmptyMultiSets[String])(multi => {
 
     multi.countMap.values.forall(_ <= multi.mode._2)
   })
@@ -135,7 +135,7 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
-  def SumEqualsSumOfIterator[T](implicit arb: Arbitrary[T], num: Numeric[T]): Prop = forAll((multi: MultiSet[T]) => {
+  def SumEqualsSumOfIterator[T](implicit arb: Arbitrary[T], num: Numeric[T]): Prop = forAll((multi: MapMultiSet[T]) => {
 
     multi.iterator.sum == multi.sum
   })
@@ -169,11 +169,11 @@ object MultiSetSpec extends Properties("MultiSet Specification") {
 
   property("Adding item increases size by 1 [String]") = AddingItemIncrementsSize[String]
 
-  property("MultiSet mode has highest count [Int]") = MultiSetModeHasHighestCount[Int]
+  property("MultiSet mode has highest count [Int]") = ModeHasHighestCount[Int]
 
-  property("MultiSet mode has highest count [BigInt]") = MultiSetModeHasHighestCount[BigInt]
+  property("MultiSet mode has highest count [BigInt]") = ModeHasHighestCount[BigInt]
 
-  property("MultiSet mode has highest count [String]") = MultiSetModeHasHighestCount[String]
+  property("MultiSet mode has highest count [String]") = ModeHasHighestCount[String]
 
   property("Sum of MultiSet Equals Sum of its Iterator [Int]") = SumEqualsSumOfIterator[Int]
 
