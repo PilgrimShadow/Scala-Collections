@@ -179,6 +179,37 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
     multi.exists(p) == multi.iterator.exists(p)
   })
 
+  /**
+    *
+    * @param arb
+    * @tparam T
+    * @return
+    */
+  def FilterEqualsFilterOfIterator[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T], p: T => Boolean) => {
+    multi.filter(p) == MapMultiSet[T](multi.iterator.filter(p))
+  })
+
+
+  /**
+    *
+    * @param arb
+    * @tparam T
+    * @return
+    */
+  def FilterNotEqualsFilterNotOfIterator[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T], p: T => Boolean) => {
+    multi.filterNot(p) == MapMultiSet[T](multi.iterator.filterNot(p))
+  })
+
+  /**
+    *
+    * @param arb
+    * @tparam T
+    * @return
+    */
+  def FindEqualsFindOfIterator[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T], p: T => Boolean) => {
+    multi.find(p) == multi.iterator.find(p)
+  })
+
 
   /**
     * Test that all elements with zero-count are filtered out during initialization
@@ -264,4 +295,22 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   property("Exists of MultiSet Equals Exists of its Iterator [Short]") = ExistsOfMultiSetEqualsExistsOfIterator[Short]
 
   property("Exists of MultiSet Equals Exists of its Iterator [BigInt]") = ExistsOfMultiSetEqualsExistsOfIterator[BigInt]
+
+  property("Filter of MultiSet Equals Filter of its Iterator [Int]") = FilterEqualsFilterOfIterator[Int]
+
+  property("Filter of MultiSet Equals Filter of its Iterator [Short]") = FilterEqualsFilterOfIterator[Short]
+
+  property("Filter of MultiSet Equals Filter of its Iterator [BigInt]") = FilterEqualsFilterOfIterator[BigInt]
+
+  property("FilterNot of MultiSet Equals FilterNot of its Iterator [Int]") = FilterNotEqualsFilterNotOfIterator[Int]
+
+  property("FilterNot of MultiSet Equals FilterNot of its Iterator [Short]") = FilterNotEqualsFilterNotOfIterator[Short]
+
+  property("FilterNot of MultiSet Equals FilterNot of its Iterator [BigInt]") = FilterEqualsFilterOfIterator[BigInt]
+
+  property("Find of MultiSet Equals Find of its Iterator [Int]") = FindEqualsFindOfIterator[Int]
+
+  property("Find of MultiSet Equals Find of its Iterator [Short]") = FindEqualsFindOfIterator[Short]
+
+  property("Find of MultiSet Equals Find of its Iterator [BigInt]") = FindEqualsFindOfIterator[BigInt]
 }

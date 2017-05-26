@@ -1,6 +1,5 @@
 package com.jgdodson.collections
 
-import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable
 
 /**
@@ -24,7 +23,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @param items The items to include in the MultiSet
     * @return
     */
-  def this(items: Iterable[T]) = this {
+  def this(items: TraversableOnce[T]) = this {
 
     val m = mutable.Map[T, Int]()
 
@@ -43,6 +42,28 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
   def apply(elem: T): Int = countMap(elem)
 
 
+  /**
+    *
+    * MapMultiSets are isomorphic to their backing maps, hence their hash codes are, too.
+    *
+    * @return
+    */
+  override def hashCode(): Int = countMap.hashCode()
+
+
+  /**
+    *
+    * TODO: Research how to properly write this method
+    *
+    * @param obj
+    * @return
+    */
+  override def equals(obj: Any): Boolean = obj match {
+    case x: MapMultiSet[T] => x.countMap == this.countMap
+    case _ => false
+  }
+
+  
   /**
     * Return a Map containing the counts of all elements
     *
@@ -231,6 +252,55 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
 
 
   /**
+    * Keep only elements that satisfy a predicate
+    *
+    * @param p The predicate used to filter elements
+    * @return
+    */
+  override def filter(p: (T) => Boolean): MapMultiSet[T] = {
+
+    val m = countMap.filterKeys(p)
+
+    // Only create a new MultiSet if elements were removed
+    if (m.size == countMap.size) {
+      this
+    } else {
+      MapMultiSet(m)
+    }
+  }
+
+
+  /**
+    * Keep only elements that DO NOT satisfy a predicate
+    *
+    * @param p The predicate used to filter elements
+    * @return
+    */
+  override def filterNot(p: (T) => Boolean): MapMultiSet[T] = {
+
+    val m = countMap.filterKeys(!p(_))
+
+    // Only create a new MultiSet if elements were removed
+    if (m.size == countMap.size) {
+      this
+    } else {
+      MapMultiSet(m)
+    }
+  }
+
+
+  /**
+    * Find the first element satisfying the given collection
+    *
+    * @param p The predicate used to test elements
+    * @return
+    */
+  override def find(p: (T) => Boolean): Option[T] = {
+    countMap.keysIterator.find(p)
+  }
+
+
+  /**
     * Count the number of elements which satisfy a given predicate
     *
     * @param p The predicate used to test elements
@@ -281,7 +351,7 @@ object MapMultiSet {
   def apply[T](countMap: Map[T, Int]): MapMultiSet[T] = new MapMultiSet[T](countMap)
 
   // Convenience method
-  def apply[T](items: Iterable[T]): MapMultiSet[T] = new MapMultiSet[T](items)
+  def apply[T](items: TraversableOnce[T]): MapMultiSet[T] = new MapMultiSet[T](items)
 
   // Convenience method
   def apply[T](args: T*): MapMultiSet[T] = new MapMultiSet[T](args)
