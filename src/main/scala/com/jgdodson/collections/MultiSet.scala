@@ -10,8 +10,21 @@ package com.jgdodson.collections
 trait MultiSet[T] extends Iterable[T] {
 
 
+  /**
+    * Return a MultiSet with the given element added
+    *
+    * @param elem The element to be added
+    * @return
+    */
   def +(elem: T): MultiSet[T]
 
+
+  /**
+    * Return a MultiSet with the given element removed
+    *
+    * @param elem The element to remove
+    * @return
+    */
   def -(elem: T): MultiSet[T]
 
   // TODO: Research what type the parameter should be
@@ -45,15 +58,6 @@ trait MultiSet[T] extends Iterable[T] {
     * @return
     */
   def mode: (T, Int)
-
-
-  /**
-    * Return the count of the given element
-    *
-    * @param elem The element for which to retrieve the count
-    * @return
-    */
-  def count(elem: T): Int
 
 
   /**

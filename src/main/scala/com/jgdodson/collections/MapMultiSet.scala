@@ -1,5 +1,6 @@
 package com.jgdodson.collections
 
+import scala.collection.generic.CanBuildFrom
 import scala.collection.mutable
 
 /**
@@ -13,20 +14,6 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
   // Check the integrity of countMap
   // TODO: Research the proper Error to throw here
   assert(counts.values.forall(_ >= 0), s"MapMultiSet initialization failed: ${counts}")
-
-
-  /**
-    * The number of elements in the MultiSet
-    */
-  override val size: Int = counts.values.sum
-
-
-  /**
-    * Return a Map containing the counts of all elements
-    *
-    * @return
-    */
-  def countMap: Map[T, Int] = counts.filter(_._2 > 0)
 
 
   /**
@@ -48,6 +35,27 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     m.toMap
   }
 
+  /**
+    *
+    * @param elem
+    * @return
+    */
+  def apply(elem: T): Int = countMap(elem)
+
+
+  /**
+    * Return a Map containing the counts of all elements
+    *
+    * @return
+    */
+  def countMap: Map[T, Int] = counts.filter(_._2 > 0)
+
+
+  /**
+    * The number of elements in the MultiSet
+    */
+  override val size: Int = countMap.values.sum
+
 
   /**
     * Return a MultiSet with the given element added
@@ -56,7 +64,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @return
     */
   def +(elem: T): MapMultiSet[T] = {
-    MapMultiSet[T](counts.updated(elem, counts.getOrElse(elem, 0) + 1))
+    MapMultiSet[T](countMap.updated(elem, countMap.getOrElse(elem, 0) + 1))
   }
 
 
@@ -74,7 +82,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
       m(elem) = m.getOrElse(elem, 0) + 1
     }
 
-    new MapMultiSet(counts.map(elem => (elem._1, elem._2 + m.getOrElse(elem._1, 0))))
+    new MapMultiSet(countMap.map(elem => (elem._1, elem._2 + m.getOrElse(elem._1, 0))))
   }
 
 
@@ -85,11 +93,11 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @return
     */
   def -(elem: T): MapMultiSet[T] = {
-    if (counts.contains(elem)) {
-      if (counts(elem) > 1) {
-        MapMultiSet(counts.updated(elem, counts(elem) - 1))
+    if (countMap.contains(elem)) {
+      if (countMap(elem) > 1) {
+        MapMultiSet(countMap.updated(elem, countMap(elem) - 1))
       } else {
-        MapMultiSet(counts - elem)
+        MapMultiSet(countMap - elem)
       }
     } else {
       this
@@ -111,7 +119,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
       m(elem) = m.getOrElse(elem, 0) + 1
     }
 
-    new MapMultiSet(counts.map(elem => (elem._1, math.max(0, elem._2 - m.getOrElse(elem._1, 0)))))
+    new MapMultiSet(countMap.map(elem => (elem._1, math.max(0, elem._2 - m.getOrElse(elem._1, 0)))))
   }
 
 
@@ -122,25 +130,38 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @return
     */
   def contains(elem: T): Boolean = {
-    counts.contains(elem)
+    countMap.contains(elem)
   }
 
 
   /**
-    * Determine whether this MultiSet is empty
+    * Determine whether this MapMultiSet is empty
     *
     * @return
     */
   override def isEmpty: Boolean = {
-    counts.isEmpty
+    countMap.isEmpty
   }
 
   /**
+    * Determine whether this MapMultiSet is non-empty
     *
     * @return
     */
   override def nonEmpty: Boolean = {
-    counts.nonEmpty
+    countMap.nonEmpty
+  }
+
+
+  /**
+    * Return a new MapMultiSet where elements have been transformed with the given function
+    *
+    * @param f The function to map over the elements
+    * @tparam B The type of the resulting elements
+    * @return
+    */
+  def map[B](f: (T) => B): MapMultiSet[B] = {
+    new MapMultiSet(countMap.map(p => (f(p._1), p._2)))
   }
 
 
@@ -151,7 +172,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @tparam B The type of the resultant sum
     * @return
     */
-  override def sum[B >: T](implicit num: Numeric[B]): B = counts.foldLeft(num.zero)((acc, next) => num.plus(acc, num.times(next._1, num.fromInt(next._2))))
+  override def sum[B >: T](implicit num: Numeric[B]): B = countMap.foldLeft(num.zero)((acc, next) => num.plus(acc, num.times(next._1, num.fromInt(next._2))))
 
 
   /**
@@ -161,7 +182,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @tparam B The type of the resultant max
     * @return
     */
-  override def max[B >: T](implicit cmp: Ordering[B]): T = counts.keysIterator.max[B]
+  override def max[B >: T](implicit cmp: Ordering[B]): T = countMap.keysIterator.max[B]
 
 
   /**
@@ -172,7 +193,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @tparam B The type of the resultant max
     * @return
     */
-  override def maxBy[B](f: (T) => B)(implicit cmp: Ordering[B]): T = counts.keysIterator.maxBy[B](f)
+  override def maxBy[B](f: (T) => B)(implicit cmp: Ordering[B]): T = countMap.keysIterator.maxBy[B](f)
 
 
   /**
@@ -182,7 +203,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @tparam B The type of the resultant min
     * @return
     */
-  override def min[B >: T](implicit cmp: Ordering[B]): T = counts.keysIterator.min[B]
+  override def min[B >: T](implicit cmp: Ordering[B]): T = countMap.keysIterator.min[B]
 
 
   /**
@@ -193,7 +214,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     * @tparam B The type of the resultant min
     * @return
     */
-  override def minBy[B](f: (T) => B)(implicit cmp: Ordering[B]): T = counts.keysIterator.minBy[B](f)
+  override def minBy[B](f: (T) => B)(implicit cmp: Ordering[B]): T = countMap.keysIterator.minBy[B](f)
 
 
   /**
@@ -205,18 +226,28 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     */
   def mode: (T, Int) = {
 
-    counts.maxBy(_._2)
+    countMap.maxBy(_._2)
   }
 
 
   /**
-    * Return the count of the given element
+    * Count the number of elements which satisfy a given predicate
     *
-    * @param elem The element for which to retrieve the count
+    * @param p The predicate used to test elements
     * @return
     */
-  def count(elem: T): Int = {
-    counts(elem)
+  override def count(p: T => Boolean): Int = {
+    countMap.foldLeft[Int](0)((acc, next) => acc + (if (p(next._1)) next._2 else 0))
+  }
+
+  /**
+    * Tests whether a predicate holds for at least one element of the MapMultiSet
+    *
+    * @param p The predicate used to test elements
+    * @return
+    */
+  override def exists(p: T => Boolean): Boolean = {
+    countMap.keysIterator.exists(p)
   }
 
 
@@ -225,7 +256,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     *
     * @return
     */
-  override def toSet[B >: T]: Set[B] = counts.keysIterator.asInstanceOf[Iterator[B]].toSet
+  override def toSet[B >: T]: Set[B] = countMap.keysIterator.asInstanceOf[Iterator[B]].toSet
 
 
   /**
@@ -241,7 +272,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     *
     * @return
     */
-  def iterator: Iterator[T] = counts.iterator.flatMap(p => Iterator.fill(p._2)(p._1))
+  def iterator: Iterator[T] = countMap.iterator.flatMap(p => Iterator.fill(p._2)(p._1))
 }
 
 object MapMultiSet {

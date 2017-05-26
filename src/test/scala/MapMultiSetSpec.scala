@@ -14,7 +14,7 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
     *
     * TODO: Add a parameter to indicate elements which should be excluded
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @tparam T The type of item the arbitrary MultiSets will contain
     * @return
     */
@@ -25,10 +25,25 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
     Arbitrary.arbitrary[Map[T, Int]].map(m => MapMultiSet(m.mapValues(count => (if (count == 0 || count == Int.MinValue) 1 else math.abs(count)).min(100))))
   }
 
+
+  /**
+    * Generate arbitrary predicate functions
+    *
+    * Is this sufficient? Perhaps use the ScalaCheck RNG to vary the output
+    *
+    * @tparam T The input type of the generated predicates
+    * @return
+    */
+  implicit def ArbitraryPredicate[T]: Arbitrary[T => Boolean] = Arbitrary {
+
+    (t: T) => t.hashCode() % 2 == 0
+  }
+
+
   /**
     * Generate arbitrary, non-empty MultiSets
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @tparam T The type of item the arbitrary MultiSets will contain
     * @return
     */
@@ -47,7 +62,7 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   /**
     * Test that the emptiness of a MultiSet always agrees with its size
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
@@ -59,7 +74,7 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   /**
     * Test that the size of a MultiSet is always non-negative
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
@@ -69,7 +84,7 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   /**
     * Test that a MultiSet is never simultaneously empty and non-empty
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
@@ -79,7 +94,7 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   /**
     * Test that adding an item to a MultiSet always increases its size by 1
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
@@ -89,7 +104,7 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   /**
     * Test that the mode of a MultiSet is always the most numerous element
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
@@ -102,7 +117,7 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   /**
     * Test that the max of a MultiSet is the max of its Iterator
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @param ord
     * @tparam T The type of item a tested MultiSet will contain
     * @return
@@ -116,7 +131,7 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   /**
     * Test that the min of a MultiSet equals the min of its Iterator
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @param ord
     * @tparam T The type of item a tested MultiSet will contain
     * @return
@@ -128,26 +143,52 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
 
 
   /**
-    * Test that the sum of a MultiSet equals the sum of its Iterator
+    * Test that the sum of a MapMultiSet equals the sum of its Iterator
     *
-    * @param arb
+    * @param arb An object to generate arbitrary instances of T
     * @param num
     * @tparam T The type of item a tested MultiSet will contain
     * @return
     */
   def SumEqualsSumOfIterator[T](implicit arb: Arbitrary[T], num: Numeric[T]): Prop = forAll((multi: MapMultiSet[T]) => {
 
-    multi.iterator.sum == multi.sum
+    multi.sum == multi.iterator.sum
   })
 
+
   /**
-    * Test that all elements with zero-count are filtered out during initialization
     *
     * @param arb
     * @tparam T
     * @return
     */
+  def CountOfMultiSetEqualsCountOfIterator[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T], p: T => Boolean) => {
+
+
+    multi.count(p) == multi.iterator.count(p)
+  })
+
+
+  /**
+    *
+    * @param arb
+    * @tparam T
+    * @return
+    */
+  def ExistsOfMultiSetEqualsExistsOfIterator[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T], p: T => Boolean) => {
+    multi.exists(p) == multi.iterator.exists(p)
+  })
+
+
+  /**
+    * Test that all elements with zero-count are filtered out during initialization
+    *
+    * @param arb An object to generate arbitrary instances of T
+    * @tparam T The type of item a tested MultiSet will contain
+    * @return
+    */
   def ZeroCountsAreFilteredOut[T](implicit arb: Arbitrary[T]): Prop = forAll((elem: T) => {
+
     val multi = MapMultiSet[T](Map(elem -> 0))
 
     !multi.countMap.contains(elem)
@@ -211,4 +252,16 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   property("Zero-count elements are filtered out [Short]") = ZeroCountsAreFilteredOut[Short]
 
   property("Zero-count elements are filtered out [BigInt]") = ZeroCountsAreFilteredOut[BigInt]
+
+  property("Count of MultiSet Equals Count of its Iterator [Int]") = CountOfMultiSetEqualsCountOfIterator[Int]
+
+  property("Count of MultiSet Equals Count of its Iterator [Short]") = CountOfMultiSetEqualsCountOfIterator[Short]
+
+  property("Count of MultiSet Equals Count of its Iterator [BigInt]") = CountOfMultiSetEqualsCountOfIterator[BigInt]
+
+  property("Exists of MultiSet Equals Exists of its Iterator [Int]") = ExistsOfMultiSetEqualsExistsOfIterator[Int]
+
+  property("Exists of MultiSet Equals Exists of its Iterator [Short]") = ExistsOfMultiSetEqualsExistsOfIterator[Short]
+
+  property("Exists of MultiSet Equals Exists of its Iterator [BigInt]") = ExistsOfMultiSetEqualsExistsOfIterator[BigInt]
 }
