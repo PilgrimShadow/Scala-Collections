@@ -63,7 +63,7 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     case _ => false
   }
 
-  
+
   /**
     * Return a Map containing the counts of all elements
     *
@@ -183,6 +183,27 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     */
   def map[B](f: (T) => B): MapMultiSet[B] = {
     new MapMultiSet(countMap.map(p => (f(p._1), p._2)))
+  }
+
+
+  /**
+    * Group elements according to a discriminator function
+    *
+    * @param f The discriminator function
+    * @tparam K
+    * @return
+    */
+  override def groupBy[K](f: (T) => K): Map[K, Iterable[T]] = {
+
+    val m = mutable.Map[K, List[T]]()
+
+    for ((elem, count) <- countMap) {
+      val k = f(elem)
+
+      m.update(k, m.getOrElse(k, List[T]()) ++ List.tabulate(count)(_ => elem))
+    }
+
+    m.toMap
   }
 
 
@@ -328,6 +349,13 @@ class MapMultiSet[T](counts: Map[T, Int]) extends MultiSet[T] {
     */
   override def toSet[B >: T]: Set[B] = countMap.keysIterator.asInstanceOf[Iterator[B]].toSet
 
+
+  /**
+    * The prefix of an instance's toString representation
+    *
+    * @return
+    */
+  override def stringPrefix: String = "MapMultiSet"
 
   /**
     * Create a new Builder for MultiSets with the same type as this

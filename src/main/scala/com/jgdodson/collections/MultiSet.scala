@@ -65,7 +65,7 @@ trait MultiSet[T] extends Iterable[T] {
     *
     * @return
     */
-  override def toString: String = s"MultiSet(${iterator.mkString(", ")})"
+  override def stringPrefix: String = "MultiSet"
 
 }
 

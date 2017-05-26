@@ -82,6 +82,18 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
 
 
   /**
+    * Test that the size of the MapMultiSet is equal to the size of its Iterator
+    *
+    * @param arb An object to generate arbitrary instances of T
+    * @tparam T The type of item a tested MultiSet will contain
+    * @return
+    */
+  def SizeIsSizeOfIterator[T](implicit arb: Arbitrary[T]): Prop = forAll((multi: MapMultiSet[T]) => {
+    multi.size == multi.iterator.size
+  })
+
+
+  /**
     * Test that a MultiSet is never simultaneously empty and non-empty
     *
     * @param arb An object to generate arbitrary instances of T
@@ -226,6 +238,9 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   })
 
 
+  // TODO: Write a test for groupBy
+
+
   property("Empty MultiSet is empty [Int]") = EmptyMultiSetIsEmpty[Int]
 
   property("Empty MultiSet is empty [BigInt]") = EmptyMultiSetIsEmpty[BigInt]
@@ -247,6 +262,14 @@ object MapMultiSetSpec extends Properties("MapMultiSet Specification") {
   property("Size is non-negative [BigInt]") = SizeIsNonNegative[BigInt]
 
   property("Size is non-negative [String]") = SizeIsNonNegative[String]
+
+  property("Size is size of Iterator [Int]") = SizeIsSizeOfIterator[Int]
+
+  property("Size is size of Iterator [Short]") = SizeIsSizeOfIterator[Short]
+
+  property("Size is size of Iterator [BigInt]") = SizeIsSizeOfIterator[BigInt]
+
+  property("Size is size of Iterator [String]") = SizeIsSizeOfIterator[String]
 
   property("Adding item increases size by 1 [Int]") = AddingItemIncrementsSize[Int]
 
